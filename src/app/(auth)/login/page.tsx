@@ -1,12 +1,6 @@
 "use client"
 
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
-import { signIn } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Card,
   CardContent,
@@ -15,7 +9,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { signIn } from "@/lib/auth-client"
 import { Flame } from "lucide-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -24,8 +24,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
 
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
+  const callbackUrl = "/dashboard"
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
