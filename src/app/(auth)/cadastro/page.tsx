@@ -17,9 +17,73 @@ import {
 } from "@/components/ui/card"
 import { Flame } from "lucide-react"
 
+function getCpfDigits(value: string) {
+  return value.replace(/\D/g, "").slice(0, 11)
+}
+
+function formatCpf(value: string) {
+  const digits = getCpfDigits(value)
+
+  if (digits.length <= 3) {
+    return digits
+  }
+
+  if (digits.length <= 6) {
+    return `${digits.slice(0, 3)}.${digits.slice(3)}`
+  }
+
+  if (digits.length <= 9) {
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`
+  }
+
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`
+}
+
+function isValidCpf(value: string) {
+  const digits = getCpfDigits(value)
+
+  if (digits.length !== 11) {
+    return false
+  }
+
+  if (/^(\d)\1+$/.test(digits)) {
+    return false
+  }
+
+  const numbers = digits.split("").map(Number)
+
+  let sum = 0
+  for (let index = 0; index < 9; index += 1) {
+    sum += numbers[index] * (10 - index)
+  }
+
+  let firstCheck = (sum * 10) % 11
+  if (firstCheck === 10) {
+    firstCheck = 0
+  }
+
+  if (firstCheck !== numbers[9]) {
+    return false
+  }
+
+  sum = 0
+  for (let index = 0; index < 10; index += 1) {
+    sum += numbers[index] * (11 - index)
+  }
+
+  let secondCheck = (sum * 10) % 11
+  if (secondCheck === 10) {
+    secondCheck = 0
+  }
+
+  return secondCheck === numbers[10]
+}
+
 export default function CadastroPage() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
+  const [cellphone, setCellphone] = useState("")
+  const [taxId, setTaxId] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
@@ -27,9 +91,26 @@ export default function CadastroPage() {
 
   const router = useRouter()
 
+  function handleTaxIdChange(value: string) {
+    setTaxId(formatCpf(value))
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError("")
+
+    const trimmedCellphone = cellphone.trim()
+    const taxIdDigits = getCpfDigits(taxId)
+
+    if (!trimmedCellphone || !taxIdDigits) {
+      setError("Informe seu celular e CPF")
+      return
+    }
+
+    if (!isValidCpf(taxIdDigits)) {
+      setError("Informe um CPF válido")
+      return
+    }
 
     if (password !== confirmPassword) {
       setError("As senhas não coincidem")
@@ -42,6 +123,8 @@ export default function CadastroPage() {
       email,
       password,
       name,
+      cellphone: trimmedCellphone,
+      taxId: formatCpf(taxIdDigits),
     })
 
     if (result.error) {
@@ -57,7 +140,7 @@ export default function CadastroPage() {
     <Card className="border-2 border-orange-200 dark:border-orange-900/50 shadow-xl">
       <CardHeader className="text-center space-y-2">
         <div className="mx-auto w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center mb-2">
-          <Flame className="w-7 h-7 text-white" />
+          <Flame className="w-7 h-7 text-white" role="presentation" />
         </div>
         <CardTitle className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
           Criar Conta
@@ -95,6 +178,31 @@ export default function CadastroPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="cellphone">Celular</Label>
+            <Input
+              id="cellphone"
+              type="tel"
+              placeholder="Seu celular"
+              value={cellphone}
+              onChange={(e) => setCellphone(e.target.value)}
+              required
+              autoComplete="tel"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="taxId">CPF</Label>
+            <Input
+              id="taxId"
+              type="text"
+              placeholder="000.000.000-00"
+              value={taxId}
+              onChange={(e) => handleTaxIdChange(e.target.value)}
+              required
+              inputMode="numeric"
+              maxLength={14}
             />
           </div>
           <div className="space-y-2">

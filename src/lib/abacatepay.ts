@@ -11,6 +11,9 @@ export const abacatepay = apiKey ? AbacatePay(apiKey) : null
 export async function createDepositBilling(
   userId: string,
   userEmail: string,
+  userName: string,
+  userCellphone: string,
+  userTaxId: string,
   amountCents: number
 ) {
   if (!abacatepay) {
@@ -32,7 +35,10 @@ export async function createDepositBilling(
     returnUrl: `${process.env.BETTER_AUTH_URL}/carteira`,
     completionUrl: `${process.env.BETTER_AUTH_URL}/carteira?deposito=sucesso`,
     customer: {
+      name: userName,
       email: userEmail,
+      cellphone: userCellphone,
+      taxId: userTaxId,
     },
   })
 

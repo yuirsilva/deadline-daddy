@@ -23,21 +23,33 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  if (!session.user.cellphone || !session.user.taxId) {
+    return NextResponse.json(
+      { error: "Cadastro incompleto. Informe celular e CPF/CNPJ." },
+      { status: 400 }
+    )
+  }
+
   const billing = await createDepositBilling(
     session.user.id,
     session.user.email,
+    session.user.name,
+    session.user.cellphone,
+    session.user.taxId,
     amount
   )
 
-  await db.payment.create({
-    data: {
-      amount,
-      type: "DEPOSIT",
-      status: "PENDING",
-      externalId: billing.data.id,
-      userId: session.user.id,
-    },
-  })
+  if (billing?.data?.id) {
+    await db.payment.create({
+      data: {
+        amount,
+        type: "DEPOSIT",
+        status: "PENDING",
+        externalId: billing.data.id,
+        userId: session.user.id,
+      },
+    })
+  }
 
-  return NextResponse.json({ url: billing.data.url })
+  return NextResponse.json({ url: billing?.data?.url ?? `${process.env.BETTER_AUTH_URL}/carteira` })
 }
