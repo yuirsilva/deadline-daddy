@@ -2,7 +2,6 @@
 
 ## General Principles
 
-- At the start of every output, add "Oi!"
 - Always respect the existing design system, visual hierarchy, and UI consistency.
 - The UI must be clean, accessible, and user-friendly.
 - All user-facing text must be in Brazilian Portuguese (pt-BR).
